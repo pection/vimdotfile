@@ -1,0 +1,27 @@
+#!sh
+tree() {
+    perl -E '
+        my $tree_binary = shift;
+        my @options = ();
+        my @ignore_list = split(":", $ENV{TREE_IGNORE});
+        while(@ARGV) {
+            my $this_arg = shift;
+            if($this_arg ne "-I") {
+                push @options, $this_arg;
+            } else {
+                push @ignore_list, shift;
+            }
+        }
+        if(@ignore_list) {
+            push @options, "-I", join("|",
+                grep { length($_) }
+                map {
+                     $_ eq "\\\$FIGNORE" ? split(":", $ENV{FIGNORE}) :
+                                           $_
+                } @ignore_list
+            )
+        }
+
+        exec $tree_binary, @options;
+    ' $(which tree) $(cat ~/.treerc 2>/dev/null) "$@"    
+} 

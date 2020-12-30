@@ -1,0 +1,19 @@
+# bash
+
+complete -F __ssh_bash_completions ssh
+
+__ssh_bash_completions () {
+    local cur opts prefix
+    COMPREPLY=()
+    prefix=""
+
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    opts="$(sed -E 's/[, ].*//' $HOME/.ssh/known_hosts)"
+
+    if [[ $cur == *@* ]] ; then
+        cur=$(echo $cur|sed 's/.*@//')
+        prefix="@"
+    fi
+
+    COMPREPLY=( $(compgen -P "$prefix" -W "$opts" -- "$cur") )
+}

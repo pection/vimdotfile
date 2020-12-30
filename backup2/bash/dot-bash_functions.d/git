@@ -1,0 +1,37 @@
+git() {
+    if [[ "$1" == "pullall" ]]; then
+        _gitall pull
+    elif [[ "$1" == "pushall" ]]; then
+        _gitall push
+    elif [[ "$1" == "statusall" ]]; then
+        _gitall status
+    elif [[ "$1" == "defaultbranch" ]]; then
+        $(which git) checkout $($(which git) remote show origin | awk '/HEAD branch/ {print $NF}')
+    elif [[ "$1" == "log" ]]; then
+        shift
+        $(which git) log --graph "$@"
+    elif [[ "$1" == "commit" ]]; then
+        shift
+        for i in "$@"; do
+            if [ "$i" == "-a" ] || [ "$i" == "--all" ]; then
+                echo NO\! SHAN\'T\! $i is BAD\!
+                return 1
+            fi
+        done
+        $(which git) commit "$@"
+    else
+        $(which git) "$@"
+    fi
+} 
+
+_gitall() {
+    for i in *; do
+        if [[ -d $i ]]; then
+            echo $i
+            (
+                cd $i
+                git $1 2>&1| sed 's/^/    /'
+            )
+        fi
+    done
+}
